@@ -18,6 +18,7 @@ ENV/
 data/*.pdf
 data/*.docx
 data/*.txt
+!data/sample_itinerary.txt
 
 # IDE
 .vscode/
