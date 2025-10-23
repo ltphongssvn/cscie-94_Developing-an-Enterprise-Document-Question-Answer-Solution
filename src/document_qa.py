@@ -3,12 +3,11 @@
 
 import os
 from dotenv import load_dotenv
-from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import AzureOpenAIEmbeddings
-from langchain.vectorstores.azuresearch import AzureSearch
-from langchain.chat_models import AzureChatOpenAI
+from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
+from langchain_community.vectorstores.azuresearch import AzureSearch
 from langchain.chains import RetrievalQA
+from src.document_loader import MultiFormatDocumentLoader
 
 
 class DocumentQASystem:
@@ -35,6 +34,7 @@ class DocumentQASystem:
         self.vector_store = None
         self.llm = None
         self.qa_chain = None
+        self.document_loader = MultiFormatDocumentLoader()
 
     def initialize_embeddings(self):
         """Initialize Azure OpenAI embeddings."""
@@ -48,9 +48,13 @@ class DocumentQASystem:
 
     def load_documents(self, data_dir="data"):
         """Load documents from directory."""
-        loader = DirectoryLoader(data_dir, glob="**/*.pdf", loader_cls=PyPDFLoader)
-        documents = loader.load()
-        print(f"✓ Loaded {len(documents)} documents")
+        self.document_loader = MultiFormatDocumentLoader(data_dir)
+        documents = self.document_loader.load_all()
+
+        file_counts = self.document_loader.get_file_count()
+        print(f"✓ Loaded {len(documents)} document pages")
+        print(f"  File types: {file_counts}")
+
         return documents
 
     def split_documents(self, documents, chunk_size=1000, chunk_overlap=200):
@@ -128,12 +132,18 @@ def main():
     # Setup (load and index documents)
     qa_system.setup()
 
-    # Example query
-    question = "What are the main features of the travel itinerary?"
-    result = qa_system.query(question)
+    # Example queries
+    queries = [
+        "What are the main destinations in this travel itinerary?",
+        "What is included in the package?",
+        "What are the accommodation details?",
+    ]
 
-    print(f"\nQuestion: {question}")
-    print(f"Answer: {result['result']}")
+    for question in queries:
+        result = qa_system.query(question)
+        print(f"\nQuestion: {question}")
+        print(f"Answer: {result['result']}")
+        print("-" * 80)
 
 
 if __name__ == "__main__":

@@ -17,9 +17,14 @@ langchain-community==0.2.12
 # Document Processing
 pypdf==3.17.1
 python-docx==1.1.0
+unstructured==0.15.0
 
 # Environment Management
 python-dotenv==1.0.0
 
 # Utilities
-tiktoken==0.8.0
+tiktoken==0.7.0
+
+# Testing
+pytest==7.4.3
+pytest-mock==3.12.0
