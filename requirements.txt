@@ -1,0 +1,25 @@
+# requirements.txt
+# Full path: /requirements.txt
+
+# Azure Services
+azure-identity==1.15.0
+azure-search-documents==11.4.0
+azure-core==1.29.5
+
+# OpenAI
+openai==1.40.0
+
+# LangChain
+langchain==0.2.14
+langchain-openai==0.1.22
+langchain-community==0.2.12
+
+# Document Processing
+pypdf==3.17.1
+python-docx==1.1.0
+
+# Environment Management
+python-dotenv==1.0.0
+
+# Utilities
+tiktoken==0.8.0
