@@ -1,6 +1,5 @@
 # src/cli.py
 # Full path: /src/cli.py
-
 import argparse
 from src.document_qa import DocumentQASystem
 
@@ -29,6 +28,10 @@ def interactive_mode(qa_system):
             if result.get("source_documents"):
                 print(f"\n[Based on {len(result['source_documents'])} sources]")
 
+        except EOFError:
+            # Handle piped input or closed stdin
+            print("\nEnd of input detected. Exiting...")
+            break
         except KeyboardInterrupt:
             print("\nGoodbye!")
             break

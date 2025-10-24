@@ -3,10 +3,10 @@
 
 import os
 from dotenv import load_dotenv
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from langchain_community.vectorstores.azuresearch import AzureSearch
-from langchain.chains import RetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from src.document_loader import MultiFormatDocumentLoader
 
 
@@ -92,7 +92,7 @@ class DocumentQASystem:
 
     def create_qa_chain(self, top_k=3):
         """Create RetrievalQA chain."""
-        retriever = self.vector_store.as_retriever(search_kwargs={"k": top_k})
+        retriever = self.vector_store.as_retriever(search_kwargs={})
 
         self.qa_chain = RetrievalQA.from_chain_type(
             llm=self.llm,
@@ -107,7 +107,7 @@ class DocumentQASystem:
         if not self.qa_chain:
             raise ValueError("QA chain not initialized. Run setup first.")
 
-        result = self.qa_chain({"query": question})
+        result = self.qa_chain.invoke({"query": question})
         return result
 
     def setup(self, data_dir="data"):
