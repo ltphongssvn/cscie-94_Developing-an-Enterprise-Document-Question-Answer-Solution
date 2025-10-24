@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from langchain_community.vectorstores.azuresearch import AzureSearch
-from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
 from src.document_loader import MultiFormatDocumentLoader
 
 
@@ -17,19 +19,16 @@ class DocumentQASystem:
         """Initialize the QA system with Azure configurations."""
         load_dotenv()
 
-        # Azure OpenAI Configuration
         self.azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         self.azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.api_version = os.getenv("AZURE_OPENAI_API_VERSION")
         self.deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
         self.embedding_deployment = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME")
 
-        # Azure Search Configuration
         self.search_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
         self.search_key = os.getenv("AZURE_SEARCH_API_KEY")
         self.index_name = os.getenv("AZURE_SEARCH_INDEX_NAME")
 
-        # Initialize components
         self.embeddings = None
         self.vector_store = None
         self.llm = None
@@ -75,7 +74,6 @@ class DocumentQASystem:
             embedding_function=self.embeddings.embed_query,
         )
 
-        # Upsert documents
         self.vector_store.add_documents(documents=chunks)
         print(f"✓ Upserted {len(chunks)} chunks to Azure Search")
 
@@ -91,15 +89,19 @@ class DocumentQASystem:
         print("✓ LLM initialized")
 
     def create_qa_chain(self, top_k=3):
-        """Create RetrievalQA chain."""
-        retriever = self.vector_store.as_retriever(search_kwargs={})
+        """Create retrieval chain."""
+        retriever = self.vector_store.as_retriever(search_kwargs={"k": top_k})
 
-        self.qa_chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            chain_type="stuff",
-            retriever=retriever,
-            return_source_documents=True,
+        prompt = ChatPromptTemplate.from_template(
+            """Answer based on context:
+
+Context: {context}
+
+Question: {input}"""
         )
+
+        document_chain = create_stuff_documents_chain(self.llm, prompt)
+        self.qa_chain = create_retrieval_chain(retriever, document_chain)
         print("✓ QA chain created")
 
     def query(self, question):
@@ -107,8 +109,11 @@ class DocumentQASystem:
         if not self.qa_chain:
             raise ValueError("QA chain not initialized. Run setup first.")
 
-        result = self.qa_chain.invoke({"query": question})
-        return result
+        result = self.qa_chain.invoke({"input": question})
+        return {
+            "result": result["answer"],
+            "source_documents": result.get("context", []),
+        }
 
     def setup(self, data_dir="data"):
         """Complete setup process."""
@@ -126,13 +131,9 @@ class DocumentQASystem:
 
 def main():
     """Main execution function."""
-    # Initialize system
     qa_system = DocumentQASystem()
-
-    # Setup (load and index documents)
     qa_system.setup()
 
-    # Example queries
     queries = [
         "What are the main destinations in this travel itinerary?",
         "What is included in the package?",
