@@ -1,4 +1,4 @@
-#### fine_tuning/README.md
+fine_tuning/README.md
 # Azure OpenAI Fine-Tuning - Complete Implementation
 
 ## Executive Summary
@@ -300,7 +300,7 @@ AZURE_OPENAI_API_VERSION=2024-08-01-preview
 - Integration into applications
 
 **Active deployment**: rice-thai-5pct @ Sweden Central
-#### fine_tuning/READINESS_ASSESSMENT.md
+fine_tuning/READINESS_ASSESSMENT.md
 # Azure OpenAI Fine-Tuning Readiness Assessment
 
 ## 1. Why fine-tune a model?
@@ -385,7 +385,7 @@ All 5 readiness criteria satisfied:
 **Status:** Fine-tuning complete and deployed
 **Model:** gpt-35-turbo-0125.ft-383faf4466084382960e84f995123316-rice-thai-5pct-azure
 **Deployment:** rice-thai-5pct (Succeeded)
-#### fine_tuning/IMPLEMENTATION_AUDIT.md
+fine_tuning/IMPLEMENTATION_AUDIT.md
 # Azure OpenAI Fine-Tuning Implementation Audit
 
 ## Status: ✅ 100% COMPLETE
