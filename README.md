@@ -64,6 +64,7 @@ python src/document_qa.py
 
 ### 1. API Route Fix Implementation
 Fixed catch-all route intercepting API endpoints by adding `/api` prefix:
+
 ```bash
 $ cat backend/api.py | grep "@app"
 @app.on_event("startup")
